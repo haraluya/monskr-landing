@@ -1,0 +1,43 @@
+{
+  "version": 1,
+  "updated_at": "2026-03-13T00:00:00Z",
+  "brand": {
+    "name": "MONSKR",
+    "theme_color": "#FFD700"
+  },
+  "urls": [
+    {
+      "id": "shop",
+      "name": "MONSKR 商店",
+      "url": "https://tomvape.com/tw",
+      "status": "active",
+      "primary": true
+    },
+    {
+      "id": "install",
+      "name": "安裝 App",
+      "url": "https://tomvape.com/tw/install",
+      "status": "active",
+      "highlight": true
+    },
+    {
+      "id": "store",
+      "name": "瀏覽商品",
+      "url": "https://tomvape.com/tw/store",
+      "status": "active"
+    },
+    {
+      "id": "cart",
+      "name": "購物車",
+      "url": "https://tomvape.com/tw/cart",
+      "status": "active"
+    }
+  ],
+  "social": [
+    {
+      "platform": "line",
+      "url": "",
+      "label": "LINE 官方帳號"
+    }
+  ]
+}
