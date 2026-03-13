@@ -1,4 +1,4 @@
-/* MONSKR Landing Page — 品牌一致的純 CSS */
+/* MONSKR Landing Page — 永久導航站 */
 
 * {
   margin: 0;
@@ -23,7 +23,7 @@ body {
 /* Header */
 .header {
   text-align: center;
-  margin-bottom: 2rem;
+  margin-bottom: 1.5rem;
 }
 
 .logo {
@@ -61,6 +61,22 @@ body {
   font-size: 0.875rem;
   color: #888;
   margin-top: 0.25rem;
+}
+
+/* Announcement card */
+.announcement-card {
+  background: white;
+  border-radius: 1rem;
+  padding: 1rem 1.25rem;
+  margin-bottom: 1.25rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+  border-left: 4px solid #FFD700;
+}
+
+.announcement-card p {
+  font-size: 0.8125rem;
+  color: #555;
+  line-height: 1.6;
 }
 
 /* Install banner */
@@ -106,18 +122,18 @@ body {
   transform: scale(0.98);
 }
 
-/* Links list */
-.links-list {
+/* Sites list */
+.sites-list {
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
   margin-bottom: 2rem;
 }
 
-.link-card {
+.site-card {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  justify-content: space-between;
   padding: 1rem 1.25rem;
   background: white;
   border-radius: 1rem;
@@ -127,100 +143,38 @@ body {
   transition: transform 0.15s, box-shadow 0.15s;
 }
 
-.link-card:active {
+.site-card:active {
   transform: scale(0.98);
 }
 
-.link-card:hover {
+.site-card:hover {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
-.link-card.highlight {
-  border: 2px solid #FFD700;
-  background: #FFFEF5;
-}
-
-.link-card.primary {
+.site-card.primary {
   background: #FFD700;
   font-weight: 700;
 }
 
-.link-icon {
-  width: 2.5rem;
-  height: 2.5rem;
-  border-radius: 0.75rem;
-  background: rgba(255, 215, 0, 0.15);
+.site-info {
   display: flex;
   align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  font-size: 1.25rem;
+  gap: 0.5rem;
 }
 
-.link-card.primary .link-icon {
-  background: rgba(0, 0, 0, 0.08);
-}
-
-.link-name {
+.site-title {
   font-size: 0.9375rem;
   font-weight: 600;
 }
 
-.link-arrow {
-  margin-left: auto;
+.site-arrow {
   color: #ccc;
   font-size: 1.25rem;
+  flex-shrink: 0;
 }
 
-.link-card.primary .link-arrow {
+.site-card.primary .site-arrow {
   color: rgba(0, 0, 0, 0.3);
-}
-
-/* Social */
-.social-section {
-  text-align: center;
-  padding-top: 1rem;
-  border-top: 1px solid rgba(0, 0, 0, 0.06);
-}
-
-.social-section h4 {
-  font-size: 0.75rem;
-  color: #999;
-  font-weight: 500;
-  margin-bottom: 0.75rem;
-}
-
-.social-links {
-  display: flex;
-  justify-content: center;
-  gap: 0.75rem;
-}
-
-.social-link {
-  display: flex;
-  align-items: center;
-  gap: 0.375rem;
-  padding: 0.5rem 1rem;
-  background: white;
-  border-radius: 2rem;
-  text-decoration: none;
-  color: #666;
-  font-size: 0.8125rem;
-  font-weight: 500;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
-  transition: transform 0.15s;
-}
-
-.social-link:active {
-  transform: scale(0.98);
-}
-
-/* Footer */
-.footer {
-  text-align: center;
-  margin-top: 2rem;
-  font-size: 0.6875rem;
-  color: #bbb;
 }
 
 /* Status dot */
@@ -229,7 +183,7 @@ body {
   height: 8px;
   border-radius: 50%;
   display: inline-block;
-  margin-right: 0.25rem;
+  flex-shrink: 0;
 }
 
 .status-dot.active {
@@ -240,7 +194,10 @@ body {
   background: #CBD5E0;
 }
 
-/* Hide inactive links */
-.link-card.inactive {
-  display: none;
+/* Footer */
+.footer {
+  text-align: center;
+  margin-top: 2rem;
+  font-size: 0.6875rem;
+  color: #bbb;
 }

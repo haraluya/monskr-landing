@@ -1,17 +1,15 @@
-// MONSKR Landing Page — 讀取 urls.json + 裝置偵測
+// MONSKR Landing Page — 永久導航站
 // 建立日期：2026-03-13
 
 (function () {
   "use strict"
 
-  // 簡易裝置偵測
   function detectDevice() {
     var ua = navigator.userAgent
     var isIOS = /iPad|iPhone|iPod/.test(ua)
     var isAndroid = /Android/i.test(ua)
     var isMobile = isIOS || isAndroid || /webOS|BlackBerry|IEMobile/i.test(ua)
 
-    // in-app browser
     var isLine = /Line\//i.test(ua)
     var isFB = /FBAN|FBAV/i.test(ua)
     var isIG = /Instagram/i.test(ua)
@@ -26,89 +24,45 @@
     }
   }
 
-  // Icon 映射
-  var iconMap = {
-    shop: "🛒",
-    install: "📲",
-    store: "🏪",
-    cart: "🛍️",
-  }
+  function renderSites(data) {
+    var container = document.getElementById("sites-list")
+    if (!container || !data.sites) return
 
-  // 渲染連結清單
-  function renderLinks(data) {
-    var container = document.getElementById("links-list")
-    if (!container || !data.urls) return
-
-    data.urls.forEach(function (item) {
-      if (item.status !== "active") return
-
+    data.sites.forEach(function (site) {
       var a = document.createElement("a")
-      a.href = item.url
-      a.className = "link-card"
-      if (item.primary) a.className += " primary"
-      if (item.highlight) a.className += " highlight"
+      a.href = site.url
+      a.className = "site-card"
+      if (site.primary) a.className += " primary"
 
-      var icon = document.createElement("div")
-      icon.className = "link-icon"
-      icon.textContent = iconMap[item.id] || "🔗"
+      var info = document.createElement("div")
+      info.className = "site-info"
 
-      var name = document.createElement("span")
-      name.className = "link-name"
-      name.textContent = item.name
+      var title = document.createElement("span")
+      title.className = "site-title"
+      title.textContent = site.label + " \u2014 " + site.domain
+
+      var dot = document.createElement("span")
+      dot.className = "status-dot active"
+
+      info.appendChild(dot)
+      info.appendChild(title)
 
       var arrow = document.createElement("span")
-      arrow.className = "link-arrow"
-      arrow.textContent = "→"
+      arrow.className = "site-arrow"
+      arrow.textContent = "\u2192"
 
-      a.appendChild(icon)
-      a.appendChild(name)
+      a.appendChild(info)
       a.appendChild(arrow)
       container.appendChild(a)
     })
   }
 
-  // 渲染社群連結
-  function renderSocial(data) {
-    var container = document.getElementById("social-links")
-    if (!container || !data.social) return
-
-    var hasSocial = false
-    data.social.forEach(function (item) {
-      if (!item.url) return
-      hasSocial = true
-
-      var a = document.createElement("a")
-      a.href = item.url
-      a.className = "social-link"
-      a.target = "_blank"
-      a.rel = "noopener noreferrer"
-      a.textContent = item.label
-
-      container.appendChild(a)
-    })
-
-    if (!hasSocial) {
-      var section = document.getElementById("social-section")
-      if (section) section.style.display = "none"
-    }
-  }
-
-  // 設定安裝引導
   function setupInstallBanner(data) {
     var banner = document.getElementById("install-banner")
     if (!banner) return
 
     var device = detectDevice()
-
-    // 找安裝連結
-    var installUrl = ""
-    if (data.urls) {
-      data.urls.forEach(function (item) {
-        if (item.id === "install" && item.status === "active") {
-          installUrl = item.url
-        }
-      })
-    }
+    var installUrl = data.install_url || ""
 
     if (!installUrl) {
       banner.style.display = "none"
@@ -119,23 +73,23 @@
     var btn = banner.querySelector(".btn-install")
 
     if (device.isInApp) {
-      if (p) p.textContent = "您正在 " + device.inAppName + " 中，請先用瀏覽器開啟"
+      if (p) p.textContent = "\u60A8\u6B63\u5728 " + device.inAppName + " \u4E2D\uFF0C\u8ACB\u5148\u7528\u700F\u89BD\u5668\u958B\u555F"
       if (btn) {
-        btn.textContent = "複製連結"
+        btn.textContent = "\u8907\u88FD\u9023\u7D50"
         btn.href = "#"
         btn.onclick = function (e) {
           e.preventDefault()
           copyToClipboard(installUrl)
-          btn.textContent = "已複製！"
+          btn.textContent = "\u5DF2\u8907\u88FD\uFF01"
           setTimeout(function () {
-            btn.textContent = "複製連結"
+            btn.textContent = "\u8907\u88FD\u9023\u7D50"
           }, 2000)
         }
       }
     } else {
-      if (p) p.textContent = "加到主畫面，享受更快速的購物體驗"
+      if (p) p.textContent = "\u5B89\u88DD\u5F8C\u5373\u4F7F\u57DF\u540D\u8B8A\u66F4\u4E5F\u80FD\u81EA\u52D5\u66F4\u65B0"
       if (btn) {
-        btn.textContent = "安裝 App"
+        btn.textContent = "\u5B89\u88DD App"
         btn.href = installUrl
       }
     }
@@ -160,33 +114,29 @@
     document.body.removeChild(input)
   }
 
-  // 載入 JSON
   function loadData() {
     fetch("urls.json")
       .then(function (res) {
         return res.json()
       })
       .then(function (data) {
-        renderLinks(data)
-        renderSocial(data)
+        renderSites(data)
         setupInstallBanner(data)
       })
       .catch(function (err) {
         console.error("Failed to load urls.json:", err)
-        // 最低限度 fallback
-        var container = document.getElementById("links-list")
+        var container = document.getElementById("sites-list")
         if (container) {
           var a = document.createElement("a")
-          a.href = "https://tomvape.com/tw"
-          a.className = "link-card primary"
+          a.href = "https://monskr.uk/tw"
+          a.className = "site-card primary"
           a.innerHTML =
-            '<div class="link-icon">🛒</div><span class="link-name">MONSKR 商店</span><span class="link-arrow">→</span>'
+            '<div class="site-info"><span class="status-dot active"></span><span class="site-title">\u4E3B\u7AD9 \u2014 monskr.uk</span></div><span class="site-arrow">\u2192</span>'
           container.appendChild(a)
         }
       })
   }
 
-  // 啟動
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", loadData)
   } else {
