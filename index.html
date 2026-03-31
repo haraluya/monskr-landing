@@ -10,8 +10,14 @@
 </head>
 <body>
   <div class="container">
+    <!-- 自動導向中的 Loading -->
+    <div id="redirect-loading" style="display:none" class="redirect-loading">
+      <div class="spinner"></div>
+      <p>正在為您找到可用的網址...</p>
+    </div>
+
     <!-- Header -->
-    <header class="header">
+    <header class="header" id="main-content">
       <div class="logo">
         <span class="logo-text">M</span>
       </div>
@@ -33,6 +39,42 @@
 
     <!-- Sites -->
     <div id="sites-list" class="sites-list"></div>
+
+    <!-- 管理按鈕 -->
+    <div style="text-align:center; margin-top:24px;">
+      <button id="admin-toggle" class="btn-admin" onclick="toggleAdmin()">管理域名</button>
+    </div>
+
+    <!-- 管理介面 -->
+    <div id="admin-panel" style="display:none" class="admin-panel">
+      <!-- Token 設定 -->
+      <div id="token-setup" class="admin-section">
+        <h3>GitHub Token 設定</h3>
+        <p class="admin-hint">首次使用需輸入 GitHub Personal Access Token（僅限 monskr-landing repo）</p>
+        <input type="password" id="token-input" placeholder="ghp_xxxxxxxxxxxx" class="admin-input">
+        <button onclick="saveToken()" class="btn-primary">儲存 Token</button>
+      </div>
+
+      <!-- 域名管理 -->
+      <div id="domain-manager" style="display:none" class="admin-section">
+        <h3>域名管理</h3>
+
+        <!-- 新增域名 -->
+        <div class="add-domain-form">
+          <input type="text" id="new-domain-input" placeholder="輸入新域名（例如 newshop.com）" class="admin-input">
+          <button onclick="addDomain()" class="btn-primary" id="add-domain-btn">新增</button>
+        </div>
+        <div id="add-domain-status" class="status-message" style="display:none"></div>
+
+        <!-- 域名列表 -->
+        <div id="domain-list" class="domain-list"></div>
+
+        <!-- 操作按鈕 -->
+        <div class="admin-actions">
+          <button onclick="clearToken()" class="btn-danger">清除 Token</button>
+        </div>
+      </div>
+    </div>
 
     <!-- Footer -->
     <footer class="footer">

@@ -1,19 +1,9 @@
 {
   "version": 1,
-  "updated": "2026-03-13",
+  "updated": "2026-03-31",
   "backendApi": "https://api.tomvape.com",
   "domains": [
-    {
-      "domain": "tomvape.com",
-      "url": "https://tomvape.com",
-      "priority": 1,
-      "status": "active"
-    },
-    {
-      "domain": "monskr.uk",
-      "url": "https://monskr.uk",
-      "priority": 2,
-      "status": "active"
-    }
+    { "domain": "monskr.uk", "url": "https://monskr.uk", "priority": 1, "status": "active" },
+    { "domain": "tomvape.com", "url": "https://tomvape.com", "priority": 2, "status": "active" }
   ]
 }
