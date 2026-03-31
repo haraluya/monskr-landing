@@ -201,3 +201,257 @@ body {
   font-size: 0.6875rem;
   color: #bbb;
 }
+
+/* 自動導向 Loading */
+.redirect-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  gap: 16px;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid rgba(255, 215, 0, 0.3);
+  border-top-color: #FFD700;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* 狀態指示燈 */
+.status-dot.testing {
+  background: #9CA3AF;
+  animation: pulse 1.5s infinite;
+}
+
+.status-dot.inactive {
+  background: #EF4444;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+/* 管理按鈕 */
+.btn-admin {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: rgba(255, 255, 255, 0.5);
+  padding: 6px 16px;
+  border-radius: 8px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-admin:hover {
+  border-color: rgba(255, 255, 255, 0.4);
+  color: rgba(255, 255, 255, 0.8);
+}
+
+/* 管理面板 */
+.admin-panel {
+  margin-top: 24px;
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+}
+
+.admin-section h3 {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: #fff;
+}
+
+.admin-hint {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.5);
+  margin-bottom: 12px;
+}
+
+.admin-input {
+  width: 100%;
+  padding: 10px 14px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 10px;
+  color: #fff;
+  font-size: 14px;
+  margin-bottom: 10px;
+  box-sizing: border-box;
+}
+
+.admin-input::placeholder {
+  color: rgba(255, 255, 255, 0.3);
+}
+
+.admin-input:focus {
+  outline: none;
+  border-color: #FFD700;
+}
+
+.btn-primary {
+  background: #FFD700;
+  color: #000;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-primary:hover {
+  background: #FFED4A;
+}
+
+.btn-primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-danger {
+  background: #EF4444;
+  color: #fff;
+}
+
+.btn-danger:hover {
+  background: #DC2626;
+}
+
+.btn-small {
+  padding: 4px 12px;
+  font-size: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: transparent;
+  color: rgba(255, 255, 255, 0.7);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-small:hover {
+  border-color: rgba(255, 255, 255, 0.4);
+  color: #fff;
+}
+
+.btn-small.btn-danger {
+  border-color: rgba(239, 68, 68, 0.4);
+  color: #EF4444;
+  background: transparent;
+}
+
+.btn-small.btn-danger:hover {
+  background: rgba(239, 68, 68, 0.15);
+}
+
+/* 新增域名表單 */
+.add-domain-form {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.add-domain-form .admin-input {
+  margin-bottom: 0;
+  flex: 1;
+}
+
+.add-domain-form .btn-primary {
+  white-space: nowrap;
+}
+
+/* 狀態訊息 */
+.status-message {
+  font-size: 13px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  margin-bottom: 12px;
+}
+
+.status-message.info {
+  background: rgba(59, 130, 246, 0.15);
+  color: #93C5FD;
+}
+
+.status-message.success {
+  background: rgba(34, 197, 94, 0.15);
+  color: #86EFAC;
+}
+
+.status-message.warning {
+  background: rgba(245, 158, 11, 0.15);
+  color: #FCD34D;
+}
+
+.status-message.error {
+  background: rgba(239, 68, 68, 0.15);
+  color: #FCA5A5;
+}
+
+/* 域名列表 */
+.domain-list {
+  margin-top: 16px;
+}
+
+.domain-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  margin-bottom: 8px;
+}
+
+.domain-item-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.domain-name {
+  font-size: 14px;
+  color: #fff;
+  font-weight: 500;
+}
+
+.domain-badge {
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 6px;
+  font-weight: 500;
+}
+
+.domain-badge.active {
+  background: rgba(34, 197, 94, 0.15);
+  color: #86EFAC;
+}
+
+.domain-badge.disabled {
+  background: rgba(156, 163, 175, 0.15);
+  color: #9CA3AF;
+}
+
+.domain-item-actions {
+  display: flex;
+  gap: 6px;
+}
+
+.admin-actions {
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
