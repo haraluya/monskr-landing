@@ -1,475 +1,314 @@
-// MONSKR Landing Page — 永久導航站 + 域名管理
-// 建立日期：2026-03-31
+/* =============================================================================
+ * MONSKR Landing · 永久導航站
+ * 三層 fallback 資料載入 → 分組排序 → live probe → FLIP 重排 → 動態安裝按鈕
+ * ============================================================================= */
 
-;(function () {
-  "use strict"
+(function () {
+  "use strict";
 
-  var GITHUB_OWNER = "haraluya"
-  var GITHUB_REPO = "monskr-landing"
-  var GITHUB_FILE = "domains.json"
-  var TOKEN_KEY = "monskr-github-token"
-  var ADMIN_PIN = "831025"
-  var domainsData = null
-  var fileSha = null
+  const LANDING_REPO_URL = "https://haraluya.github.io/monskr-landing/domains.json";
+  const LOCAL_URLS_PATH = "./urls.json";
+  const PROBE_TIMEOUT_MS = 5000;
+  const INSTALL_PATH = "/tw/install";
 
-  // ===== 自動導向 =====
-  function checkRedirect() {
-    var params = new URLSearchParams(window.location.search)
-    var redirectPath = params.get("r")
-    if (!redirectPath) return false
-
-    document.getElementById("redirect-loading").style.display = "flex"
-    document.getElementById("main-content").style.display = "none"
-
-    loadDomains(function (data) {
-      if (!data || !data.domains) {
-        showMainContent()
-        return
+  /**
+   * 三層 fallback 載入 domains 資料
+   *  1st: 本地 ./urls.json（local dev 才會存在）
+   *  2nd: https://haraluya.github.io/monskr-landing/domains.json
+   *  3rd: window.FALLBACK_DOMAINS（inline 於 index.html）
+   */
+  async function loadDomainsData() {
+    // 1st: local
+    try {
+      const local = await fetchJSON(LOCAL_URLS_PATH, 2000);
+      if (local && Array.isArray(local.domains) && local.domains.length) {
+        return normalizeSchema(local);
       }
+    } catch (_) { /* ignore, fall through */ }
 
-      var active = data.domains
-        .filter(function (d) { return d.status === "active" })
-        .sort(function (a, b) { return a.priority - b.priority })
+    // 2nd: remote
+    try {
+      const remote = await fetchJSON(LANDING_REPO_URL + "?t=" + Date.now(), 3000);
+      if (remote && Array.isArray(remote.domains) && remote.domains.length) {
+        return normalizeSchema(remote);
+      }
+    } catch (_) { /* ignore, fall through */ }
 
-      testDomainsSequentially(active, 0, function (availableUrl) {
-        if (availableUrl) {
-          window.location.href = availableUrl + redirectPath
-        } else {
-          showMainContent()
-          document.getElementById("redirect-loading").style.display = "none"
-        }
-      })
-    })
-
-    return true
-  }
-
-  function showMainContent() {
-    document.getElementById("main-content").style.display = ""
-    document.getElementById("redirect-loading").style.display = "none"
-  }
-
-  function testDomainsSequentially(domains, index, callback) {
-    if (index >= domains.length) {
-      callback(null)
-      return
+    // 3rd: inline fallback
+    if (window.FALLBACK_DOMAINS && Array.isArray(window.FALLBACK_DOMAINS.domains)) {
+      return normalizeSchema(window.FALLBACK_DOMAINS);
     }
-    testDomain(domains[index].url, function (ok) {
-      if (ok) {
-        callback(domains[index].url)
-      } else {
-        testDomainsSequentially(domains, index + 1, callback)
-      }
-    })
+
+    // 實務上不應走到這（HTML inline 有保底），但留個空殼避免 null deref
+    return { version: 3, domains: [] };
   }
 
-  function testDomain(url, callback) {
-    var timeout = setTimeout(function () { callback(false) }, 3000)
-    fetch(url + "/tw", { mode: "no-cors" })
-      .then(function () { clearTimeout(timeout); callback(true) })
-      .catch(function () { clearTimeout(timeout); callback(false) })
-  }
-
-  // ===== 域名顯示 =====
-  function loadDomains(callback) {
-    fetch("domains.json?t=" + Date.now())
-      .then(function (res) { return res.json() })
-      .then(function (data) {
-        domainsData = data
-        if (callback) callback(data)
-      })
-      .catch(function () {
-        // fallback
-        domainsData = {
-          version: 1,
-          updated: "",
-          backendApi: "https://api.tomvape.com",
-          domains: [
-            { domain: "monskr.uk", url: "https://monskr.uk", priority: 1, status: "active" }
-          ]
-        }
-        if (callback) callback(domainsData)
-      })
-  }
-
-  function renderDomains(data) {
-    var container = document.getElementById("sites-list")
-    if (!container || !data.domains) return
-    container.innerHTML = ""
-
-    var active = data.domains
-      .filter(function (d) { return d.status === "active" })
-      .sort(function (a, b) { return a.priority - b.priority })
-
-    active.forEach(function (d, i) {
-      var a = document.createElement("a")
-      a.href = d.url + "/tw"
-      a.className = "site-card" + (i === 0 ? " primary" : "")
-
-      var info = document.createElement("div")
-      info.className = "site-info"
-
-      var dot = document.createElement("span")
-      dot.className = "status-dot testing"
-      dot.id = "dot-" + d.domain
-
-      var title = document.createElement("span")
-      title.className = "site-title"
-      title.textContent = (i === 0 ? "主站" : "備用站") + " — " + d.domain
-
-      info.appendChild(dot)
-      info.appendChild(title)
-
-      var arrow = document.createElement("span")
-      arrow.className = "site-arrow"
-      arrow.textContent = "\u2192"
-
-      a.appendChild(info)
-      a.appendChild(arrow)
-      container.appendChild(a)
-
-      // 即時測試連線
-      testDomain(d.url, function (ok) {
-        dot.className = "status-dot " + (ok ? "active" : "inactive")
-      })
-    })
-  }
-
-  // ===== 安裝 Banner =====
-  function setupInstallBanner(data) {
-    var banner = document.getElementById("install-banner")
-    if (!banner || !data.domains || data.domains.length === 0) return
-
-    var primaryDomain = data.domains.find(function (d) { return d.priority === 1 }) || data.domains[0]
-    var installUrl = primaryDomain.url + "/tw/install"
-
-    var ua = navigator.userAgent
-    var isLine = /Line\//i.test(ua)
-    var isFB = /FBAN|FBAV/i.test(ua)
-    var isIG = /Instagram/i.test(ua)
-    var isInApp = isLine || isFB || isIG
-
-    var p = banner.querySelector("p")
-    var btn = banner.querySelector(".btn-install")
-
-    if (isInApp) {
-      var appName = isLine ? "LINE" : isFB ? "Facebook" : "Instagram"
-      if (p) p.textContent = "您正在 " + appName + " 中，請先用瀏覽器開啟"
-      if (btn) {
-        btn.textContent = "複製連結"
-        btn.href = "#"
-        btn.onclick = function (e) {
-          e.preventDefault()
-          copyText(installUrl)
-          btn.textContent = "已複製！"
-          setTimeout(function () { btn.textContent = "複製連結" }, 2000)
-        }
-      }
-    } else {
-      if (btn) btn.href = installUrl
+  async function fetchJSON(url, timeoutMs) {
+    const ctrl = new AbortController();
+    const t = setTimeout(() => ctrl.abort(), timeoutMs);
+    try {
+      const res = await fetch(url, { signal: ctrl.signal, cache: "no-store" });
+      if (!res.ok) throw new Error("HTTP " + res.status);
+      return await res.json();
+    } finally {
+      clearTimeout(t);
     }
   }
 
-  function copyText(text) {
-    if (navigator.clipboard) {
-      navigator.clipboard.writeText(text).catch(function () {})
+  /**
+   * Normalize schema — 接受 v1/v2/v3 格式，統一成 v3
+   * 舊欄位 label / primary / priority 全部忽略
+   */
+  function normalizeSchema(data) {
+    const domains = (data.domains || data.sites || []).map(function (d) {
+      return {
+        domain: d.domain,
+        url: d.url || ("https://" + d.domain),
+        addedAt: d.addedAt || "1970-01-01",
+        status: d.status === "disabled" ? "disabled" : "active"
+      };
+    });
+    return { version: 3, domains: domains };
+  }
+
+  /* ------- 分組與排序 ------- */
+
+  /**
+   * 把 domains 分為 alive / dead 兩組，每組按 addedAt 降冪
+   * probeResults: Map<domain, "on"|"off"|"unknown">
+   *   - "on"  通過 live probe
+   *   - "off" probe failed / timeout
+   *   - "unknown" 尚未 probe（初始靜態渲染用）
+   */
+  function classifyAndSort(domains, probeResults) {
+    const alive = [];
+    const dead = [];
+    domains.forEach(function (d) {
+      const probeStatus = probeResults.get(d.domain);
+      const isDead = d.status === "disabled" || probeStatus === "off";
+      (isDead ? dead : alive).push(d);
+    });
+    const byAddedDesc = function (a, b) { return (b.addedAt || "").localeCompare(a.addedAt || ""); };
+    alive.sort(byAddedDesc);
+    dead.sort(byAddedDesc);
+    return { alive: alive, dead: dead };
+  }
+
+  /**
+   * 初次渲染 — 所有 probe 狀態都當 unknown（灰色 pulsing）
+   */
+  function renderInitial(root, domains) {
+    const probeResults = new Map();
+    const groups = classifyAndSort(domains, probeResults);
+    renderGroups(root, groups, probeResults, true);
+  }
+
+  function renderGroups(root, groups, probeResults, isInitialPulse) {
+    root.innerHTML = "";
+    if (groups.alive.length > 0) {
+      root.appendChild(buildGroupHeader("可用站點", groups.alive.length));
+      groups.alive.forEach(function (d, i) {
+        root.appendChild(buildSiteRow(d, probeResults.get(d.domain) || "unknown", i, false, isInitialPulse));
+      });
+    }
+    if (groups.dead.length > 0) {
+      root.appendChild(buildGroupHeader("暫時失效", groups.dead.length));
+      groups.dead.forEach(function (d, i) {
+        root.appendChild(buildSiteRow(d, probeResults.get(d.domain) || "off", i, true, false));
+      });
     }
   }
 
-  // ===== 管理介面 =====
-  window.toggleAdmin = function () {
-    var panel = document.getElementById("admin-panel")
-    if (panel.style.display === "none") {
-      var pin = prompt("請輸入管理密碼")
-      if (pin !== ADMIN_PIN) {
-        alert("密碼錯誤")
-        return
+  function buildGroupHeader(label, count) {
+    const el = document.createElement("div");
+    el.className = "group-header";
+    el.innerHTML =
+      '<span class="group-label">' + escapeHTML(label) + '</span>' +
+      '<span class="group-count">· ' + count + '</span>';
+    return el;
+  }
+
+  function buildSiteRow(d, probeStatus, index, isDead, isInitialPulse) {
+    const a = document.createElement("a");
+    a.className = "site" + (isDead ? " dead" : "");
+    a.href = d.url + "/tw";
+    a.setAttribute("data-domain", d.domain);
+    a.style.setProperty("--i", String(index));
+
+    const dotClass = "dot " + probeStatus + (isInitialPulse && probeStatus === "unknown" ? " checking" : "");
+    a.innerHTML =
+      '<span class="site-name"><span class="' + dotClass + '"></span>' + escapeHTML(d.domain) + '</span>' +
+      '<span class="site-age">' + formatAge(d.addedAt) + '</span>';
+    return a;
+  }
+
+  function formatAge(isoDate) {
+    const then = new Date(isoDate).getTime();
+    if (!then || isNaN(then)) return "—";
+    const days = Math.floor((Date.now() - then) / 86400000);
+    if (days < 1)  return "today";
+    if (days < 30) return days + " days ago";
+    const months = Math.floor(days / 30);
+    if (months < 12) return months + " months ago";
+    const years = Math.floor(months / 12);
+    return years + " " + (years === 1 ? "year ago" : "years ago");
+  }
+
+  function escapeHTML(s) {
+    return String(s).replace(/[&<>"']/g, function (c) {
+      return { "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[c];
+    });
+  }
+
+  /* ------- Live probe ------- */
+
+  /**
+   * 並行 probe 所有 status === "active" 的域名
+   * 5 秒 timeout，用 no-cors 模式（opaque response 視為成功）
+   * 每個 probe 完成即更新該站 dot 樣式
+   * 全部完成後呼叫 onAllDone 觸發重排
+   */
+  function runProbes(domains, onProbeDone, onAllDone) {
+    const toProbe = domains.filter(function (d) { return d.status === "active"; });
+    const results = new Map();
+    const promises = toProbe.map(function (d) {
+      return probeOne(d.url).then(function (ok) {
+        results.set(d.domain, ok ? "on" : "off");
+        onProbeDone(d.domain, ok ? "on" : "off");
+      });
+    });
+    // 失效的直接標 off（不 probe）
+    domains.forEach(function (d) {
+      if (d.status === "disabled") {
+        results.set(d.domain, "off");
+        onProbeDone(d.domain, "off");
       }
-      panel.style.display = "block"
-      checkToken()
-    } else {
-      panel.style.display = "none"
+    });
+    Promise.all(promises).then(function () { onAllDone(results); });
+  }
+
+  function probeOne(url) {
+    return new Promise(function (resolve) {
+      const ctrl = new AbortController();
+      const t = setTimeout(function () { ctrl.abort(); resolve(false); }, PROBE_TIMEOUT_MS);
+      fetch(url + "/tw", { mode: "no-cors", signal: ctrl.signal, cache: "no-store" })
+        .then(function () { clearTimeout(t); resolve(true); })
+        .catch(function () { clearTimeout(t); resolve(false); });
+    });
+  }
+
+  /**
+   * 更新單一站的 dot class（不重排，只換顏色）
+   */
+  function updateDot(domain, status) {
+    const row = document.querySelector('.site[data-domain="' + CSS.escape(domain) + '"]');
+    if (!row) return;
+    const dot = row.querySelector(".dot");
+    if (!dot) return;
+    dot.className = "dot " + status;
+  }
+
+  /* ------- FLIP reorder ------- */
+
+  /**
+   * First/Last/Invert/Play — probe 完成後重新排序站點，用動畫過渡位置
+   */
+  function flipReorder(root, domains, probeResults) {
+    // First: 記錄所有 site 的當前位置
+    const rows = Array.from(root.querySelectorAll(".site"));
+    const firstRects = new Map();
+    rows.forEach(function (el) {
+      firstRects.set(el.getAttribute("data-domain"), el.getBoundingClientRect());
+    });
+
+    // Re-render with new order
+    const groups = classifyAndSort(domains, probeResults);
+    renderGroups(root, groups, probeResults, false);
+
+    // Last + Invert + Play
+    const newRows = Array.from(root.querySelectorAll(".site"));
+    newRows.forEach(function (el) {
+      const domain = el.getAttribute("data-domain");
+      const first = firstRects.get(domain);
+      if (!first) return;
+      const last = el.getBoundingClientRect();
+      const dy = first.top - last.top;
+      if (Math.abs(dy) < 1) return;
+
+      el.style.transition = "none";
+      el.style.transform = "translateY(" + dy + "px)";
+      el.style.opacity = "1";
+      el.style.animation = "none";
+
+      requestAnimationFrame(function () {
+        el.style.transition = "transform 0.2s cubic-bezier(0.22, 1, 0.36, 1)";
+        el.style.transform = "translateY(0)";
+      });
+    });
+  }
+
+  /* ------- Install button dynamic href ------- */
+
+  /**
+   * 選出「活著且 addedAt 最新」的域名作為安裝目標
+   * 若都不活，退回 addedAt 最新的 active 域名（讓使用者至少能試）
+   */
+  function pickInstallDomain(domains, probeResults) {
+    const byAddedDesc = function (a, b) { return (b.addedAt || "").localeCompare(a.addedAt || ""); };
+    const activeSorted = domains
+      .filter(function (d) { return d.status === "active"; })
+      .sort(byAddedDesc);
+    if (activeSorted.length === 0) return null;
+
+    const alive = activeSorted.find(function (d) { return probeResults.get(d.domain) === "on"; });
+    return alive || activeSorted[0];
+  }
+
+  function updateInstallButton(domains, probeResults) {
+    const btn = document.getElementById("install-btn");
+    if (!btn) return;
+    const target = pickInstallDomain(domains, probeResults);
+    if (!target) {
+      btn.removeAttribute("href");
+      return;
     }
+    btn.href = target.url + INSTALL_PATH;
   }
 
-  function checkToken() {
-    var token = localStorage.getItem(TOKEN_KEY)
-    if (token) {
-      document.getElementById("token-setup").style.display = "none"
-      document.getElementById("domain-manager").style.display = "block"
-      renderAdminDomains()
-    } else {
-      document.getElementById("token-setup").style.display = "block"
-      document.getElementById("domain-manager").style.display = "none"
-    }
-  }
+  /* ------- 入口 ------- */
 
-  window.saveToken = function () {
-    var token = document.getElementById("token-input").value.trim()
-    if (!token) { alert("請輸入 Token"); return }
-    localStorage.setItem(TOKEN_KEY, token)
-    checkToken()
-  }
+  async function main() {
+    const root = document.getElementById("sites-root");
+    if (!root) return;
+    const data = await loadDomainsData();
+    renderInitial(root, data.domains);
+    updateInstallButton(data.domains, new Map());  // 初始 href 用靜態資料選最新 active
 
-  window.clearToken = function () {
-    localStorage.removeItem(TOKEN_KEY)
-    checkToken()
-  }
+    let allOffFallbackTimer = setTimeout(function () {
+      // 若 5 秒後一個 probe 都沒完成（網路掛），把所有 pulsing dot 改回 static 灰
+      document.querySelectorAll(".dot.checking").forEach(function (el) {
+        el.classList.remove("checking");
+        el.classList.add("unknown");
+      });
+    }, PROBE_TIMEOUT_MS + 500);
 
-  function renderAdminDomains() {
-    var container = document.getElementById("domain-list")
-    if (!container || !domainsData) return
-    container.innerHTML = ""
-
-    domainsData.domains.forEach(function (d) {
-      var div = document.createElement("div")
-      div.className = "domain-item"
-
-      var info = document.createElement("div")
-      info.className = "domain-item-info"
-
-      var dot = document.createElement("span")
-      dot.className = "status-dot testing"
-      dot.id = "admin-dot-" + d.domain
-
-      var name = document.createElement("span")
-      name.className = "domain-name"
-      name.textContent = d.domain
-
-      var badge = document.createElement("span")
-      badge.className = "domain-badge " + d.status
-      badge.textContent = d.status
-
-      info.appendChild(dot)
-      info.appendChild(name)
-      info.appendChild(badge)
-
-      var actions = document.createElement("div")
-      actions.className = "domain-item-actions"
-
-      // 切換狀態
-      var toggleBtn = document.createElement("button")
-      toggleBtn.className = "btn-small"
-      toggleBtn.textContent = d.status === "active" ? "停用" : "啟用"
-      toggleBtn.onclick = (function (domain) {
-        return function () { toggleDomainStatus(domain) }
-      })(d.domain)
-      actions.appendChild(toggleBtn)
-
-      // 刪除
-      var delBtn = document.createElement("button")
-      delBtn.className = "btn-small btn-danger"
-      delBtn.textContent = "刪除"
-      delBtn.onclick = (function (domain) {
-        return function () { deleteDomain(domain) }
-      })(d.domain)
-      actions.appendChild(delBtn)
-
-      div.appendChild(info)
-      div.appendChild(actions)
-      container.appendChild(div)
-
-      // 測試連線
-      testDomain(d.url, function (ok) {
-        var adminDot = document.getElementById("admin-dot-" + d.domain)
-        if (adminDot) adminDot.className = "status-dot " + (ok ? "active" : "inactive")
-      })
-    })
-  }
-
-  window.addDomain = function () {
-    var input = document.getElementById("new-domain-input")
-    var statusEl = document.getElementById("add-domain-status")
-    var btn = document.getElementById("add-domain-btn")
-    var raw = input.value.trim()
-    if (!raw) return
-
-    // 正規化：移除 protocol 和 trailing slash
-    var domain = raw.replace(/^https?:\/\//, "").replace(/\/.*$/, "")
-    var url = "https://" + domain
-
-    btn.disabled = true
-    btn.textContent = "測試中..."
-    statusEl.style.display = "block"
-    statusEl.className = "status-message info"
-    statusEl.textContent = "正在測試 " + url + " 是否可連線..."
-
-    testDomain(url, function (ok) {
-      if (!ok) {
-        statusEl.className = "status-message warning"
-        statusEl.textContent = "\u26a0\ufe0f " + domain + " 目前無法連線，仍要新增嗎？"
-        btn.textContent = "強制新增"
-        btn.disabled = false
-        btn.onclick = function () { doAddDomain(domain, url); btn.onclick = window.addDomain }
-        return
+    runProbes(
+      data.domains,
+      function onProbeDone(domain, status) {
+        clearTimeout(allOffFallbackTimer);
+        updateDot(domain, status);
+      },
+      function onAllDone(results) {
+        flipReorder(root, data.domains, results);
+        updateInstallButton(data.domains, results);
+        window.__landingDone = { domains: data.domains, probeResults: results, root: root };
       }
-
-      doAddDomain(domain, url)
-    })
-  }
-
-  function doAddDomain(domain, url) {
-    var btn = document.getElementById("add-domain-btn")
-    var statusEl = document.getElementById("add-domain-status")
-    var input = document.getElementById("new-domain-input")
-
-    // 檢查重複
-    if (domainsData.domains.some(function (d) { return d.domain === domain })) {
-      statusEl.className = "status-message error"
-      statusEl.textContent = "\u274c " + domain + " 已存在"
-      btn.textContent = "新增"
-      btn.disabled = false
-      return
-    }
-
-    var maxPriority = domainsData.domains.reduce(function (max, d) {
-      return Math.max(max, d.priority)
-    }, 0)
-
-    domainsData.domains.push({
-      domain: domain,
-      url: url,
-      priority: maxPriority + 1,
-      status: "active"
-    })
-    domainsData.version++
-    domainsData.updated = new Date().toISOString().slice(0, 10)
-
-    btn.textContent = "儲存中..."
-    btn.disabled = true
-
-    saveToGitHub(function (success) {
-      if (success) {
-        statusEl.className = "status-message success"
-        statusEl.textContent = "\u2705 " + domain + " 已新增"
-        input.value = ""
-        renderAdminDomains()
-        renderDomains(domainsData)
-      } else {
-        statusEl.className = "status-message error"
-        statusEl.textContent = "\u274c 儲存失敗，請檢查 Token"
-        // 回滾
-        domainsData.domains = domainsData.domains.filter(function (d) { return d.domain !== domain })
-        domainsData.version--
-      }
-      btn.textContent = "新增"
-      btn.disabled = false
-      btn.onclick = window.addDomain
-    })
-  }
-
-  function toggleDomainStatus(domain) {
-    var d = domainsData.domains.find(function (x) { return x.domain === domain })
-    if (!d) return
-    d.status = d.status === "active" ? "disabled" : "active"
-    domainsData.version++
-    domainsData.updated = new Date().toISOString().slice(0, 10)
-
-    saveToGitHub(function (success) {
-      if (success) {
-        renderAdminDomains()
-        renderDomains(domainsData)
-      } else {
-        alert("儲存失敗，請檢查 Token")
-        d.status = d.status === "active" ? "disabled" : "active"
-        domainsData.version--
-      }
-    })
-  }
-
-  function deleteDomain(domain) {
-    if (!confirm("確定刪除 " + domain + "？")) return
-    var removed = domainsData.domains.find(function (x) { return x.domain === domain })
-    domainsData.domains = domainsData.domains.filter(function (d) { return d.domain !== domain })
-    domainsData.version++
-    domainsData.updated = new Date().toISOString().slice(0, 10)
-
-    saveToGitHub(function (success) {
-      if (success) {
-        renderAdminDomains()
-        renderDomains(domainsData)
-      } else {
-        alert("儲存失敗，請檢查 Token")
-        if (removed) domainsData.domains.push(removed)
-        domainsData.version--
-      }
-    })
-  }
-
-  // ===== GitHub API =====
-  function getGitHubHeaders() {
-    var token = localStorage.getItem(TOKEN_KEY)
-    return {
-      Authorization: "Bearer " + token,
-      Accept: "application/vnd.github.v3+json",
-      "Content-Type": "application/json"
-    }
-  }
-
-  function fetchFileSha(callback) {
-    fetch("https://api.github.com/repos/" + GITHUB_OWNER + "/" + GITHUB_REPO + "/contents/" + GITHUB_FILE, {
-      headers: getGitHubHeaders()
-    })
-      .then(function (res) { return res.json() })
-      .then(function (data) {
-        fileSha = data.sha
-        callback(true)
-      })
-      .catch(function () { callback(false) })
-  }
-
-  function saveToGitHub(callback) {
-    var content = btoa(unescape(encodeURIComponent(JSON.stringify(domainsData, null, 2) + "\n")))
-
-    function doSave() {
-      var body = {
-        message: "update domains.json \u2014 " + new Date().toISOString().slice(0, 10),
-        content: content,
-        sha: fileSha
-      }
-
-      fetch("https://api.github.com/repos/" + GITHUB_OWNER + "/" + GITHUB_REPO + "/contents/" + GITHUB_FILE, {
-        method: "PUT",
-        headers: getGitHubHeaders(),
-        body: JSON.stringify(body)
-      })
-        .then(function (res) {
-          if (res.ok) return res.json()
-          throw new Error("GitHub API error: " + res.status)
-        })
-        .then(function (data) {
-          fileSha = data.content.sha
-          callback(true)
-        })
-        .catch(function () { callback(false) })
-    }
-
-    if (fileSha) {
-      doSave()
-    } else {
-      fetchFileSha(function (ok) {
-        if (ok) doSave()
-        else callback(false)
-      })
-    }
-  }
-
-  // ===== 初始化 =====
-  function init() {
-    if (checkRedirect()) return
-
-    loadDomains(function (data) {
-      renderDomains(data)
-      setupInstallBanner(data)
-      // 預先取得 SHA 供管理用
-      var token = localStorage.getItem(TOKEN_KEY)
-      if (token) fetchFileSha(function () {})
-    })
+    );
   }
 
   if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", init)
+    document.addEventListener("DOMContentLoaded", main);
   } else {
-    init()
+    main();
   }
-})()
+})();
