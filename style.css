@@ -1,458 +1,312 @@
-/* MONSKR Landing Page — 永久導航站 */
+/* =============================================================================
+ * MONSKR Landing · Editorial minimalism
+ * 對齊商場 globals.css token
+ * ============================================================================= */
 
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
+:root {
+  --brand-primary: #FFD700;
+  --brand-primary-dark: #E6C200;
+  --brand-secondary: #FFF8E1;
+  --brand-accent: #1A1A1A;
+  --text-primary: #1A1A1A;
+  --text-secondary: #4A4A4A;
+  --bg-main: #FFF8E1;
+  --bg-card: #FFFFFF;
+  --bg-dark: #1A1A1A;
+  --border-subtle: #E5E4E1;
+  --font-display: "Fraunces", "Noto Serif TC", Georgia, serif;
+  --font-body: system-ui, -apple-system, "Segoe UI", "PingFang TC", "Heiti TC", "Noto Sans TC", sans-serif;
 }
 
-body {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  background-color: #FFF8E1;
-  color: #1a1a1a;
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html, body {
+  background: var(--bg-main);
+  color: var(--text-primary);
+  font-family: var(--font-body);
   min-height: 100vh;
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
+button, a, [role="button"] {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Paper grain overlay — 全頁紙質噪點，去 AI 平滑感 */
+.paper-grain {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100' height='100'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' seed='3'/><feColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .04 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+  mix-blend-mode: multiply;
+  opacity: 0.5;
+}
+
+/* Container — 手機全寬、桌機 480px 置中、元件尺寸不因桌機放大 */
 .container {
+  position: relative;
+  z-index: 2;
   max-width: 480px;
   margin: 0 auto;
-  padding: 2rem 1.25rem 3rem;
-}
-
-/* Header */
-.header {
-  text-align: center;
-  margin-bottom: 1.5rem;
-}
-
-.logo {
-  width: 72px;
-  height: 72px;
-  border-radius: 1rem;
-  margin: 0 auto 1rem;
-  background: rgba(255, 215, 0, 0.2);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
-}
-
-.logo img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  border-radius: 1rem;
-}
-
-.logo-text {
-  font-size: 1.75rem;
-  font-weight: 800;
-  color: #D4A800;
-}
-
-.brand-name {
-  font-size: 1.5rem;
-  font-weight: 800;
-  color: #1a1a1a;
-}
-
-.brand-tagline {
-  font-size: 0.875rem;
-  color: #888;
-  margin-top: 0.25rem;
-}
-
-/* Announcement card */
-.announcement-card {
-  background: white;
-  border-radius: 1rem;
-  padding: 1rem 1.25rem;
-  margin-bottom: 1.25rem;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
-  border-left: 4px solid #FFD700;
-}
-
-.announcement-card p {
-  font-size: 0.8125rem;
-  color: #555;
-  line-height: 1.6;
-}
-
-/* Install banner */
-.install-banner {
-  background: white;
-  border-radius: 1rem;
-  padding: 1.25rem;
-  margin-bottom: 1.5rem;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
-  border: 2px solid #FFD700;
-}
-
-.install-banner h3 {
-  font-size: 0.875rem;
-  font-weight: 700;
-  margin-bottom: 0.5rem;
-}
-
-.install-banner p {
-  font-size: 0.75rem;
-  color: #666;
-  line-height: 1.5;
-}
-
-.install-banner .btn-install {
-  display: block;
-  width: 100%;
-  margin-top: 0.75rem;
-  padding: 0.75rem;
-  background: #FFD700;
-  color: #1a1a1a;
-  font-weight: 700;
-  font-size: 0.875rem;
-  border: none;
-  border-radius: 0.75rem;
-  cursor: pointer;
-  text-align: center;
-  text-decoration: none;
-  transition: transform 0.15s;
-}
-
-.install-banner .btn-install:active {
-  transform: scale(0.98);
-}
-
-/* Sites list */
-.sites-list {
+  padding: 28px 20px 40px;
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
-  margin-bottom: 2rem;
+  gap: 14px;
+  min-height: 100vh;
 }
 
-.site-card {
+@media (min-width: 640px) {
+  .container { padding: 48px 24px 56px; }
+}
+
+/* Header — logo 左，permanent · 永久導航站 italic 右 */
+.header {
   display: flex;
-  align-items: center;
+  align-items: flex-end;
   justify-content: space-between;
-  padding: 1rem 1.25rem;
-  background: white;
-  border-radius: 1rem;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
-  text-decoration: none;
-  color: #1a1a1a;
-  transition: transform 0.15s, box-shadow 0.15s;
+  padding: 4px 2px 8px;
 }
 
-.site-card:active {
-  transform: scale(0.98);
+.brand-mark {
+  width: 120px;
+  height: auto;
+  fill: var(--text-primary);
 }
 
-.site-card:hover {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-}
-
-.site-card.primary {
-  background: #FFD700;
-  font-weight: 700;
-}
-
-.site-info {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.site-title {
-  font-size: 0.9375rem;
-  font-weight: 600;
-}
-
-.site-arrow {
-  color: #ccc;
-  font-size: 1.25rem;
-  flex-shrink: 0;
-}
-
-.site-card.primary .site-arrow {
-  color: rgba(0, 0, 0, 0.3);
-}
-
-/* Status dot */
-.status-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  display: inline-block;
-  flex-shrink: 0;
-}
-
-.status-dot.active {
-  background: #48BB78;
-}
-
-.status-dot.inactive {
-  background: #CBD5E0;
+.header-tag {
+  font-family: var(--font-display);
+  font-size: 10.5px;
+  font-weight: 500;
+  font-style: italic;
+  letter-spacing: 0.15em;
+  color: var(--text-secondary);
+  padding-bottom: 2px;
+  white-space: nowrap;
 }
 
 /* Footer */
 .footer {
+  margin-top: auto;
+  padding-top: 24px;
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  opacity: 0.55;
   text-align: center;
-  margin-top: 2rem;
-  font-size: 0.6875rem;
-  color: #bbb;
+  letter-spacing: 0.05em;
 }
 
-/* 自動導向 Loading */
-.redirect-loading {
-  display: flex;
-  flex-direction: column;
+/* Stagger reveal — data-reveal 數值是 ms 延遲 */
+[data-reveal] {
+  opacity: 0;
+  transform: translateY(6px);
+  animation: reveal 0.4s ease-out forwards;
+}
+[data-reveal="0"]   { animation-delay: 0ms; }
+[data-reveal="120"] { animation-delay: 120ms; }
+[data-reveal="240"] { animation-delay: 240ms; }
+
+@keyframes reveal {
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Respect reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+/* ============================================================================
+ * Hero — 黑底卡片 + MONSKR watermark + Shield emblem + 安裝按鈕
+ * 佔比 v3.1：padding 16/18/14、標題 21px、watermark 460px 垂直置中
+ * ============================================================================ */
+
+.hero {
+  position: relative;
+  background: var(--bg-dark);
+  border-radius: 18px;
+  padding: 16px 18px 14px;
+  color: #FFFFFF;
+  overflow: hidden;
+  box-shadow: 0 4px 14px rgba(26, 26, 26, 0.18);
+}
+
+.hero-watermark {
+  position: absolute;
+  right: -90px;
+  top: 50%;
+  transform: translateY(-50%) rotate(-8deg);
+  width: 460px;
+  opacity: 0.11;
+  fill: var(--brand-primary);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.hero > *:not(.hero-watermark) { position: relative; z-index: 1; }
+
+.hero-emblem {
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-height: 60vh;
-  gap: 16px;
-}
-
-.spinner {
-  width: 40px;
-  height: 40px;
-  border: 3px solid rgba(255, 215, 0, 0.3);
-  border-top-color: #FFD700;
+  width: 28px;
+  height: 28px;
+  border: 1px solid rgba(255, 215, 0, 0.38);
   border-radius: 50%;
-  animation: spin 0.8s linear infinite;
-}
-
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
-
-/* 狀態指示燈 */
-.status-dot.testing {
-  background: #9CA3AF;
-  animation: pulse 1.5s infinite;
-}
-
-.status-dot.inactive {
-  background: #EF4444;
-}
-
-@keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.4; }
-}
-
-/* 管理按鈕 */
-.btn-admin {
-  background: transparent;
-  border: 1px solid rgba(0, 0, 0, 0.15);
-  color: rgba(0, 0, 0, 0.4);
-  padding: 6px 16px;
-  border-radius: 8px;
-  font-size: 12px;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.btn-admin:hover {
-  border-color: rgba(0, 0, 0, 0.3);
-  color: rgba(0, 0, 0, 0.7);
-}
-
-/* 管理面板 */
-.admin-panel {
-  margin-top: 24px;
-  padding: 20px;
-  background: rgba(0, 0, 0, 0.03);
-  border: 1px solid rgba(0, 0, 0, 0.1);
-  border-radius: 16px;
-}
-
-.admin-section h3 {
-  font-size: 16px;
-  font-weight: 600;
+  color: var(--brand-primary);
   margin-bottom: 8px;
-  color: #1a1a1a;
 }
 
-.admin-hint {
-  font-size: 12px;
-  color: rgba(0, 0, 0, 0.5);
+.hero-title {
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: 21px;
+  letter-spacing: -0.01em;
+  line-height: 1.1;
+  color: var(--brand-primary);
+  margin-bottom: 5px;
+}
+
+.hero-sub {
+  font-size: 10.5px;
+  line-height: 1.55;
+  color: rgba(255, 255, 255, 0.7);
   margin-bottom: 12px;
+  max-width: 200px;
 }
 
-.admin-input {
-  width: 100%;
-  padding: 10px 14px;
-  background: #fff;
-  border: 1px solid rgba(0, 0, 0, 0.15);
-  border-radius: 10px;
-  color: #1a1a1a;
-  font-size: 14px;
-  margin-bottom: 10px;
-  box-sizing: border-box;
+.hero-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  background: var(--brand-primary);
+  color: var(--text-primary);
+  padding: 8px 16px;
+  border-radius: 9px;
+  font-weight: 700;
+  font-size: 12.5px;
+  letter-spacing: 0.02em;
+  text-decoration: none;
+  box-shadow: 0 2px 0 var(--brand-primary-dark);
+  transition: transform 0.15s;
 }
 
-.admin-input::placeholder {
-  color: rgba(0, 0, 0, 0.35);
-}
+.hero-btn:active { transform: scale(0.98); }
+/* ============================================================================
+ * Sites list — 分組 label + site card + live dot
+ * ============================================================================ */
 
-.admin-input:focus {
-  outline: none;
-  border-color: #FFD700;
-  box-shadow: 0 0 0 2px rgba(255, 215, 0, 0.3);
-}
-
-.btn-primary {
-  background: #FFD700;
-  color: #000;
-  border: none;
-  padding: 10px 20px;
-  border-radius: 10px;
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.btn-primary:hover {
-  background: #FFED4A;
-}
-
-.btn-primary:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.btn-danger {
-  background: #EF4444;
-  color: #fff;
-}
-
-.btn-danger:hover {
-  background: #DC2626;
-}
-
-.btn-small {
-  padding: 4px 12px;
-  font-size: 12px;
-  border: 1px solid rgba(0, 0, 0, 0.15);
-  background: transparent;
-  color: rgba(0, 0, 0, 0.6);
-  border-radius: 6px;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.btn-small:hover {
-  border-color: rgba(0, 0, 0, 0.3);
-  color: #1a1a1a;
-}
-
-.btn-small.btn-danger {
-  border-color: rgba(239, 68, 68, 0.4);
-  color: #EF4444;
-  background: transparent;
-}
-
-.btn-small.btn-danger:hover {
-  background: rgba(239, 68, 68, 0.1);
-}
-
-/* 新增域名表單 */
-.add-domain-form {
+.sites-root {
   display: flex;
-  gap: 8px;
-  margin-bottom: 12px;
+  flex-direction: column;
+  gap: 2px;
 }
 
-.add-domain-form .admin-input {
-  margin-bottom: 0;
-  flex: 1;
-}
-
-.add-domain-form .btn-primary {
-  white-space: nowrap;
-}
-
-/* 狀態訊息 */
-.status-message {
-  font-size: 13px;
-  padding: 8px 12px;
-  border-radius: 8px;
-  margin-bottom: 12px;
-}
-
-.status-message.info {
-  background: rgba(59, 130, 246, 0.1);
-  color: #2563EB;
-}
-
-.status-message.success {
-  background: rgba(34, 197, 94, 0.1);
-  color: #16A34A;
-}
-
-.status-message.warning {
-  background: rgba(245, 158, 11, 0.1);
-  color: #D97706;
-}
-
-.status-message.error {
-  background: rgba(239, 68, 68, 0.1);
-  color: #DC2626;
-}
-
-/* 域名列表 */
-.domain-list {
-  margin-top: 16px;
-}
-
-.domain-item {
+.group-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 12px;
-  background: #fff;
-  border: 1px solid rgba(0, 0, 0, 0.08);
-  border-radius: 10px;
-  margin-bottom: 8px;
+  padding: 10px 4px 6px;
 }
 
-.domain-item-info {
+.group-label {
+  font-family: var(--font-display);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+
+.group-count {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 11px;
+  color: var(--text-secondary);
+  opacity: 0.7;
+}
+
+.site {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--bg-card);
+  padding: 10px 14px;
+  border-radius: 10px;
+  font-size: 12.5px;
+  border: 1px solid var(--border-subtle);
+  color: var(--text-primary);
+  text-decoration: none;
+  margin-bottom: 5px;
+  transition: background 0.15s;
+}
+
+.site:active { background: #FFFEF5; }
+
+.site.dead { opacity: 0.48; }
+
+.site-name {
   display: flex;
   align-items: center;
   gap: 8px;
-}
-
-.domain-name {
-  font-size: 14px;
-  color: #1a1a1a;
   font-weight: 500;
 }
 
-.domain-badge {
-  font-size: 11px;
-  padding: 2px 8px;
-  border-radius: 6px;
-  font-weight: 500;
+.site-age {
+  color: var(--text-secondary);
+  font-size: 10.5px;
+  font-family: var(--font-display);
+  font-style: italic;
 }
 
-.domain-badge.active {
-  background: rgba(34, 197, 94, 0.12);
-  color: #16A34A;
+/* Live probe dot */
+.dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  background: #9CA3AF;
+  transition: background 0.3s, box-shadow 0.3s;
 }
 
-.domain-badge.disabled {
-  background: rgba(156, 163, 175, 0.15);
-  color: #6B7280;
+.dot.checking {
+  animation: dot-pulse 1.5s ease-in-out infinite;
+}
+.dot.on {
+  background: #22C55E;
+  box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.15);
+}
+.dot.off {
+  background: #EF4444;
+}
+.dot.unknown {
+  background: #9CA3AF;
 }
 
-.domain-item-actions {
-  display: flex;
-  gap: 6px;
+@keyframes dot-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.35; }
 }
 
-.admin-actions {
-  margin-top: 20px;
-  padding-top: 16px;
-  border-top: 1px solid rgba(0, 0, 0, 0.08);
+/* Stagger reveal for site items — index 從 0 開始 */
+.site {
+  opacity: 0;
+  transform: translateY(4px);
+  animation: site-reveal 0.35s ease-out forwards;
+}
+@keyframes site-reveal {
+  to { opacity: 1; transform: translateY(0); }
+}
+.site.dead {
+  animation-delay: calc(640ms + var(--i, 0) * 30ms);
+}
+.site:not(.dead) {
+  animation-delay: calc(340ms + var(--i, 0) * 50ms);
 }
