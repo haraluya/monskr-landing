@@ -12,6 +12,27 @@
   const INSTALL_PATH = "/tw/install";
 
   /**
+   * 頁面剛載入時立即從 window.FALLBACK_DOMAINS 選一個最新 active 站點，
+   * 同步設 install button href；避免使用者在 loadDomainsData() 完成前點擊。
+   * 後續 main() 完成會再用動態結果 override 這個 href。
+   */
+  function seedInstallButtonFromFallback() {
+    if (!window.FALLBACK_DOMAINS || !Array.isArray(window.FALLBACK_DOMAINS.domains)) return;
+    const actives = window.FALLBACK_DOMAINS.domains
+      .filter(function (d) { return d.status !== "disabled"; })
+      .sort(function (a, b) { return (b.addedAt || "").localeCompare(a.addedAt || ""); });
+    if (actives.length === 0) return;
+    const btn = document.getElementById("install-btn");
+    if (btn) btn.href = actives[0].url + INSTALL_PATH;
+  }
+  // 立即執行（同步、不等 main）— 安裝按鈕從第一個 paint 就有有效 href
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", seedInstallButtonFromFallback);
+  } else {
+    seedInstallButtonFromFallback();
+  }
+
+  /**
    * 三層 fallback 載入 domains 資料
    *  1st: 本地 ./urls.json（local dev 才會存在）
    *  2nd: https://haraluya.github.io/monskr-landing/domains.json
