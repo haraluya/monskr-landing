@@ -1,13 +1,13 @@
 {
   "version": 3,
-  "updated": "2026-04-21",
+  "updated": "2026-05-07",
   "backendApi": "https://bemonskr.uk",
   "domains": [
     {
       "domain": "tomvape.com",
       "url": "https://tomvape.com",
       "addedAt": "2026-01-01",
-      "status": "active"
+      "status": "disabled"
     },
     {
       "domain": "monskr.uk",
