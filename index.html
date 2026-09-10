@@ -15,13 +15,12 @@
     // 手動維護，不由 sync 腳本更新（保護免疫 sync 失敗）
     window.FALLBACK_DOMAINS = {
       version: 3,
-      updated: "2026-04-21",
+      updated: "2026-08-29",
       backendApi: "https://bemonskr.uk",
       domains: [
-        { domain: "monskr32.com", url: "https://monskr32.com", addedAt: "2026-04-21", status: "active" },
-        { domain: "monskr1.uk",   url: "https://monskr1.uk",   addedAt: "2026-04-21", status: "active" },
-        { domain: "tomvape.com",  url: "https://tomvape.com",  addedAt: "2026-01-01", status: "active" },
-        { domain: "monskr.uk",    url: "https://monskr.uk",    addedAt: "2026-03-13", status: "active" }
+        // monskr3.uk 已於 2026-08-29 因 DNS 封鎖移除（此清單無過濾邏輯，留著會把客戶導到死路）
+        { domain: "monskr5.uk",   url: "https://monskr5.uk",   addedAt: "2026-05-27", status: "active" },
+        { domain: "monskr4.uk",   url: "https://monskr4.uk",   addedAt: "2026-05-27", status: "active" }
       ]
     };
   </script>
