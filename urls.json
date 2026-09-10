@@ -1,9 +1,49 @@
 {
-  "version": 2,
-  "brand": { "name": "MONSKR", "theme_color": "#FFD700" },
-  "sites": [
-    { "domain": "monskr.uk", "label": "主站", "url": "https://monskr.uk/tw", "primary": true },
-    { "domain": "tomvape.com", "label": "備用站", "url": "https://tomvape.com/tw" }
-  ],
-  "install_url": "https://monskr.uk/tw/install"
+  "version": 3,
+  "updated": "2026-08-29",
+  "backendApi": "https://bemonskr.uk",
+  "domains": [
+    {
+      "domain": "tomvape.com",
+      "url": "https://tomvape.com",
+      "addedAt": "2026-01-01",
+      "status": "disabled"
+    },
+    {
+      "domain": "monskr1.uk",
+      "url": "https://monskr1.uk",
+      "addedAt": "2026-04-21",
+      "status": "disabled"
+    },
+    {
+      "domain": "monskr32.com",
+      "url": "https://monskr32.com",
+      "addedAt": "2026-04-21",
+      "status": "disabled"
+    },
+    {
+      "domain": "monskr2.uk",
+      "url": "https://monskr2.uk",
+      "addedAt": "2026-05-07",
+      "status": "disabled"
+    },
+    {
+      "domain": "monskr3.uk",
+      "url": "https://monskr3.uk",
+      "addedAt": "2026-05-07",
+      "status": "disabled"
+    },
+    {
+      "domain": "monskr4.uk",
+      "url": "https://monskr4.uk",
+      "addedAt": "2026-05-27",
+      "status": "active"
+    },
+    {
+      "domain": "monskr5.uk",
+      "url": "https://monskr5.uk",
+      "addedAt": "2026-05-27",
+      "status": "active"
+    }
+  ]
 }
