@@ -44,6 +44,12 @@
       "url": "https://monskr5.uk",
       "addedAt": "2026-05-27",
       "status": "disabled"
+    },
+    {
+      "domain": "monskr6.uk",
+      "url": "https://monskr6.uk",
+      "addedAt": "2026-11-27",
+      "status": "active"
     }
   ]
 }
