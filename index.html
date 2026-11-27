@@ -12,15 +12,18 @@
   <link rel="stylesheet" href="style.css">
   <script>
     // 三層 fallback 最後一層 — 若 urls.json 和 monskr-landing/domains.json 都讀不到，靠此清單保底
-    // 手動維護，不由 sync 腳本更新（保護免疫 sync 失敗）
+    // 🔴 2026-09-10 起改由 scripts/add-domain/sync-landing-domains.sh 階段 5 自動同步。
+    //    原本標「手動維護，免疫 sync 失敗」——但免疫的代價是它靜默停在 2026-04-21，
+    //    四個域名全數封鎖退場卻仍寫 active，而 app.js 用這份清單寫安裝按鈕的 href。
+    //    ⚠️ 不要手改這一塊，改 docs/domain-registry.json 再跑 sync 腳本。
     window.FALLBACK_DOMAINS = {
       version: 3,
-      updated: "2026-08-29",
+      updated: "2026-11-27",
       backendApi: "https://bemonskr.uk",
+      // 只列 active——app.js 對這份清單沒有過濾邏輯，放進 disabled 等於把客戶導到死路
+      // 主網域排第一（安裝按鈕取第一筆），由 domain-registry.json 的 primaryDomain 決定
       domains: [
-        // monskr3.uk 已於 2026-08-29 因 DNS 封鎖移除（此清單無過濾邏輯，留著會把客戶導到死路）
-        { domain: "monskr5.uk",   url: "https://monskr5.uk",   addedAt: "2026-05-27", status: "active" },
-        { domain: "monskr4.uk",   url: "https://monskr4.uk",   addedAt: "2026-05-27", status: "active" }
+        { domain: "monskr4.uk", url: "https://monskr4.uk", addedAt: "2026-05-27", status: "active" }
       ]
     };
   </script>
