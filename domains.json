@@ -1,6 +1,6 @@
 {
   "version": 3,
-  "updated": "2026-08-29",
+  "updated": "2026-11-27",
   "backendApi": "https://bemonskr.uk",
   "domains": [
     {
@@ -43,7 +43,7 @@
       "domain": "monskr5.uk",
       "url": "https://monskr5.uk",
       "addedAt": "2026-05-27",
-      "status": "active"
+      "status": "disabled"
     }
   ]
 }
